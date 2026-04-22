@@ -1,7 +1,7 @@
 const mineflayer = require('mineflayer')
 const dns = require('dns')
 
-const HOST = 'StealBrainrot.play.hosting'
+const HOST = '51.68.201.17'
 const PASSWORD = 'Bot12345'
 let registered = false
 
