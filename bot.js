@@ -9,38 +9,47 @@ function log(msg) {
 
 function createBot() {
   log('📡 Подключаюсь...')
-  
+
   const bot = mineflayer.createBot({
     host: 'StealBrainrot.play.hosting',
     username: 'KeepAliveBot',
     version: '1.21.4',
-    hideErrors: true,
+    hideErrors: false,
     closeTimeout: 240000,
-    checkTimeoutInterval: 30000
+    checkTimeoutInterval: 60000
   })
 
-  bot._client.on('resource_pack_send', (packet) => {
-    log('📦 Принимаю ресурспак...')
+  bot._client.on('connect', () => {
+    log('🔗 TCP соединение установлено')
+  })
+
+  bot._client.on('add_resource_pack', (packet) => {
+    log('🎨 Принимаю ресурспак...')
     bot._client.write('resource_pack_receive', {
-      hash: packet.hash,
-      result: 3
+      uuid: packet.uuid,
+      result: 0
     })
+    log('✅ Ресурспак принят')
   })
 
-  bot.on('login', () => log('🟢 Залогинился!'))
+  bot.on('login', () => {
+    log('🟢 Залогинился!')
+    setTimeout(() => {
+      log('📝 Отправляю /reg...')
+      bot.chat(`/reg ${PASSWORD} ${PASSWORD}`)
+    }, 3000)
+    setTimeout(() => {
+      log('🔑 Отправляю /login...')
+      bot.chat(`/login ${PASSWORD}`)
+    }, 5000)
+  })
 
   bot.on('messagestr', (message) => {
     log(`💬 ${message}`)
-    if (!registered && (message.toLowerCase().includes('reg') || message.toLowerCase().includes('register'))) {
-      setTimeout(() => { bot.chat(`/reg ${PASSWORD} ${PASSWORD}`); registered = true }, 1000)
-    }
-    if (registered && (message.toLowerCase().includes('login') || message.toLowerCase().includes('пароль'))) {
-      setTimeout(() => { bot.chat(`/login ${PASSWORD}`) }, 1000)
-    }
   })
 
   bot.on('spawn', () => {
-    log('✅ Бот на сервере!')
+    log('✅ Бот заспавнился!')
     setInterval(() => {
       bot.setControlState('forward', true)
       setTimeout(() => bot.setControlState('forward', false), 1000)
@@ -58,8 +67,8 @@ function createBot() {
     setTimeout(createBot, 15000)
   })
 
-  bot.on('end', () => {
-    log('🔄 Переподключаюсь...')
+  bot.on('end', (reason) => {
+    log(`🔄 Конец: ${reason}`)
     registered = false
     setTimeout(createBot, 15000)
   })
